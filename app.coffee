@@ -26,7 +26,7 @@ app.post '/send-mail', (req, res) ->
 
 	mail.validate (error) =>
 		if error
-			return res.send
+			return res.status(400).send
 				code : 400
 				message: error
 		
