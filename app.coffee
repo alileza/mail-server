@@ -7,11 +7,7 @@ mail = new Mandrill
 				from_name: 'Example'
 				tags: ['tes']
 
-mail.addRecipient { email: "alirezayahya@gmail.com" }
+mail.addRecipient { email: "example@example.com" }
 mail.set 'subject', 'hello world'
 mail.setTemplate 'hello-world'
 mail.send()
-
-
-
-

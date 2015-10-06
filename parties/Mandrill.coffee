@@ -14,7 +14,7 @@ class Mandrill
 		@params["headers"] =
             "Reply-To": @params.from_email
 
-	required: ['recipients', 'from_email', 'subject', 'text', 'html']
+	required: ['to', 'from_email', 'subject', 'text', 'html']
 
 	send: () ->
 		self = @
@@ -23,6 +23,7 @@ class Mandrill
 				err = new Error response
 				throw err
 			
+			console.dir self.params
 			self.mandrill '/messages/send', { message: self.params }, (error, response) ->
 				if error
 					err = new Error JSON.stringify error
@@ -53,11 +54,15 @@ class Mandrill
 		return @
 
 	addRecipient: (user) ->
-		@params.recipients = [] if typeof @params.recipients isnt 'object'
+		@params.to = [] if typeof @params.to isnt 'object'
 
-		@params.recipients.push
+		u =
 			email: user.email
-			name: if user.name then user.name else user.email
+		
+		u.name = user.name if user.name
+
+		@params.to.push u
+			
 		return @
 
 module.exports = Mandrill
