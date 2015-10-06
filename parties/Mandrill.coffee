@@ -43,10 +43,10 @@ class Mandrill
 		return @
 
 	setOptions: (body) =>
-		@addRecipients body.to
-		@setTemplate body.template if body.template
 		for key of body
 			@set key, body[key]
+		@addRecipients body.to
+		@setTemplate body.template if body.template
 		return @
 
 	setTemplate: (key) ->
