@@ -1,6 +1,6 @@
 {
-  "name": "cembri-mailer",
-  "version": "0.0.0",
+  "name": "mail-server",
+  "version": "0.0.3",
   "description": "Modules to send an email",
   "main": "app.js",
   "scripts": {
