@@ -16,6 +16,7 @@
     "express": "4.13.3",
     "fs": "0.0.2",
     "node-mandrill": "1.0.1",
+    "readline-sync": "^1.2.21",
     "settings": "~0.1.1",
     "winston": "~1.0.2"
   }

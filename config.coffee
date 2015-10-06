@@ -2,10 +2,13 @@ setEnvironment = () ->
 	try
 		return require "./.env"
 	catch e
-		exec = require('child_process').exec
-		if e.code is 'MODULE_NOT_FOUND'
-			exec 'cp ./.env-example ./.env'
-		return require "./.env-example"
+		fs = require 'fs'
+		
+		readlineSync = require('readline-sync')
+
+		apiKey = readlineSync.question('Please input Mandrill API Key : ')
+		fs.writeFileSync './.env', "exports.apiKey = '#{apiKey}'", 'utf-8'
+		return { apiKey: apiKey }
 
 ENV = setEnvironment()
 
