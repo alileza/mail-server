@@ -1,38 +1,36 @@
 http = require "http"
-Mandrill = require './parties/Mandrill.coffee'
 express = require 'express'
 bodyParser = require 'body-parser'
+Settings = require 'settings'
+CONFIG = new Settings require('./config')
+
+winston = require 'winston'
+
+winston.loggers.add 'log', console: colorize: true
+
+log = winston.loggers.get 'log'
+
+
+Mandrill = require './parties/Mandrill.coffee'
 
 app = express()
 app.use bodyParser.json()
 
-mail = new Mandrill
-	apiKey: require('./.env').apiKey
-	default: 
-		from_email: 'example@example.com'
-		from_name: 'Example'
-		tags: ['tes']
 
 app.post '/send-mail', (req, res) ->
 	
 	{ body } = req
 
-	mail.addRecipients body.to
-	mail.set 'from_email', body.from_email if body.from_email
-	mail.set 'from_name', body.from_name if body.from_name
-	mail.set 'tags', body.tags if body.tags
-	mail.set 'subject', body.subject if body.subject
-	mail.setTemplate body.template if body.template
+	mail = new Mandrill CONFIG.mandrill
 
-	mail.validate (error) =>
+	mail.setOptions body
+
+	mail.send (error, response) ->
 		if error
-			return res.status(400).send
-				code : 400
-				message: error
+			return res.status(400).send { message: error }
 		
-		mail.send()
-		res.send
-			code : 200
-			message : 'sucess'
+		return res.send response
 
-app.listen 8088
+
+app.listen CONFIG.port
+log.info "Mail server start at port #{CONFIG.port}"

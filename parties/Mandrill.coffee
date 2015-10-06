@@ -11,41 +11,76 @@ class Mandrill
 		@mandrill = require('node-mandrill') apiKey
 		@params = config.default
 
+		@errors= []
+
 		@params["headers"] =
             "Reply-To": @params.from_email
 
-	required: ['to', 'from_email', 'subject', 'text', 'html']
+	required: ['to', 'from_email', 'subject', 'template']
 
-	send: () ->
-		@validate (response) =>
-			if response
-				err = new Error response
-				throw err
-			
+	send: (cb) ->
+		if @validate()
 			@mandrill '/messages/send', { message: @params }, (error, response) ->
 				if error
-					err = new Error JSON.stringify error
-					throw err
+					return cb error
+				delete @params.html
+				return cb null, 
+						message : 'success'
+						payload : @params
+		else
+			return cb @errors
+			
 
-				console.log 'response'
-				console.log response
-
-	validate: (cb) ->
+	validate: () ->
 		@required.forEach (key) =>
-			return cb "#{key} not defined" if typeof @params?[key] is 'undefined'
-		return cb null, true
+			@errors.push "#{key} not defined" if typeof @params?[key] is 'undefined'
+			@errors.push "#{key} can not be empty" if @params?[key]?.length is 0
+
+		return if @errors.length is 0 then true else false
+
 	set: (key, value) -> 
 		@params[key] = value
 		return @
 
-	setTemplate: (key) -> 
-		text = fs.readFileSync("email-template/#{key}/text.ejs").toString()
-		text = ejs.render text, @params
+	setOptions: (body) =>
+		@addRecipients body.to
+		@setTemplate body.template if body.template
+		for key of body
+			@set key, body[key]
+		return @
+
+	setTemplate: (key) ->
+		try
+			text = fs.readFileSync("email-template/#{key}/text.ejs").toString()
+		catch e
+			@errors.push "template #{key} not exists, make sure put file `text.ejs` inside folder `email-template/#{key}/`"
+			return @
+		
+		try
+			text = ejs.render text, @params
+		catch e
+			@errors.push "failed to render `#{key}/text.ejs` make sure parameter fills all the requirement : #{e}"
+			return @
+
 		@params['text'] = text
 
-		html = fs.readFileSync("email-template/#{key}/html.ejs").toString()
-		html = ejs.render html, @params
+		try
+			html = fs.readFileSync("email-template/#{key}/html.ejs").toString()
+		catch e
+			@errors.push "template #{key} not exists, make sure put file `html.ejs` inside folder `email-template/#{key}/`"
+			return @
+
+		try
+			html = ejs.render html, @params
+		catch e
+			@errors.push "failed to render `#{key}/html.ejs` make sure parameter fills all the requirement : #{e}"
+			return @
+		
+
 		@params['html'] = html
+
+		@params.template = key
+
 		return @
 
 
@@ -54,15 +89,16 @@ class Mandrill
 		
 		# if and only if user give strign to 
 		if typeof users is "string"
-			@params.to.push { email: body.to }
+			@params.to.push { email: users }
 			return @
+		else if typeof users is "object"
+			users.forEach (user) =>
+				u = {}
+				u.email = user if typeof user is 'string'
+				u.email = user.email if user.email
+				u.name = user.name if user.name
 
-		users.forEach (user) =>
-			u =
-				email: user.email	
-			u.name = user.name if user.name
-
-			@params.to.push u
+				@params.to.push u
 			
 		return @
 
