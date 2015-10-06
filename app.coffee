@@ -1,7 +1,7 @@
 Mandrill = require './parties/Mandrill.coffee'
 
 mail = new Mandrill
-			apiKey: require('.env').apiKey
+			apiKey: require('./.env').apiKey
 			default: 
 				from_email: 'example@example.com'
 				from_name: 'Example'
