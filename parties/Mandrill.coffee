@@ -17,14 +17,12 @@ class Mandrill
 	required: ['to', 'from_email', 'subject', 'text', 'html']
 
 	send: () ->
-		self = @
-		@validate (response) ->
+		@validate (response) =>
 			if response
 				err = new Error response
 				throw err
 			
-			console.dir self.params
-			self.mandrill '/messages/send', { message: self.params }, (error, response) ->
+			@mandrill '/messages/send', { message: @params }, (error, response) ->
 				if error
 					err = new Error JSON.stringify error
 					throw err
@@ -33,12 +31,9 @@ class Mandrill
 				console.log response
 
 	validate: (cb) ->
-		self = @
-		@required.forEach (key) ->
-			return cb "#{key} not defined" if typeof self.params?[key] is 'undefined'
-
-		cb null
-
+		@required.forEach (key) =>
+			return cb "#{key} not defined" if typeof @params?[key] is 'undefined'
+		return cb null, true
 	set: (key, value) -> 
 		@params[key] = value
 		return @
@@ -53,15 +48,21 @@ class Mandrill
 		@params['html'] = html
 		return @
 
-	addRecipient: (user) ->
+
+	addRecipients: (users) ->
 		@params.to = [] if typeof @params.to isnt 'object'
-
-		u =
-			email: user.email
 		
-		u.name = user.name if user.name
+		# if and only if user give strign to 
+		if typeof users is "string"
+			@params.to.push { email: body.to }
+			return @
 
-		@params.to.push u
+		users.forEach (user) =>
+			u =
+				email: user.email	
+			u.name = user.name if user.name
+
+			@params.to.push u
 			
 		return @
 
