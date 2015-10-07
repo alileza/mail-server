@@ -11,8 +11,7 @@ $ npm start
 ```
 ### Test the mail server
 ```sh
-curl -X  \ 
-POST  -H "Content-Type: application/json" \
+curl -X  POST  -H "Content-Type: application/json" \
 http://localhost:1312/send-mail -d \
 '{"to": "alirezayahya@gmail.com","subject": "Hello World !","template" : "hello-world"}'
 ```
