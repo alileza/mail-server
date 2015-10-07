@@ -23,7 +23,10 @@ class Mandrill
 			@mandrill '/messages/send', { message: @params }, (error, response) ->
 				if error
 					return cb error
-				delete @params.html
+					
+				try
+					delete @params.html
+				
 				return cb null, 
 						message : 'success'
 						payload : @params
