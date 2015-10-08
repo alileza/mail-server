@@ -14,6 +14,7 @@ ENV = setEnvironment()
 
 module.exports =
 	common: 
+		host: 'localhost'
 		port: 1312
 		mandrill: 
 			apiKey: ENV.apiKey

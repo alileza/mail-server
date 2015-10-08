@@ -36,5 +36,5 @@ app.post '/send-mail', (req, res) ->
 		return res.send response
 
 
-app.listen CONFIG.port
-log.info "Mail server start at port #{CONFIG.port}"
+app.listen CONFIG.port, CONFIG.host
+log.info "Mail server start at #{CONFIG.host}:#{CONFIG.port}"
